@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""specar download | generate  (--backbone krea | helios | longlive)."""
+"""stridear download | generate  (--backbone krea | helios | longlive)."""
 import argparse
 import json
 import os
@@ -53,7 +53,7 @@ def resolve(a):
     a.backbone = a.backbone or ex.get("backbone", "krea")
     a.prompt = a.prompt or ex.get("prompt")
     if not a.prompt:
-        sys.exit("give --prompt or --example (specar examples lists them)")
+        sys.exit("give --prompt or --example (stridear examples lists them)")
     a.seed = ex.get("seed", 42) if a.seed is None else a.seed
     a.k = ex.get("k", LONGLIVE_K_DEFAULT if a.backbone == "longlive" else 7) if a.k is None else a.k
     if a.seconds is not None:
@@ -128,7 +128,7 @@ def write_mp4(frames, path, fps=16):
 
 def run(models, prompt, k, blocks, seed, embeds=None, steps=5, start_image=None, input_video=None, strength=0.8):
     """Generate one video; returns (session, frames, generation seconds)."""
-    from .model_krea import SpecARSession
+    from .model_krea import StrideARSession
     from .schedule import uniform_k
     frames = []
 
@@ -138,7 +138,7 @@ def run(models, prompt, k, blocks, seed, embeds=None, steps=5, start_image=None,
 
     # with an input video the block count is known only after it is read, so the schedule is built from it then
     anchors = (lambda h: uniform_k(min(k, h), h)) if input_video else uniform_k(k, blocks)
-    sess = SpecARSession(models, prompt, seed, blocks, anchors, prompt_embeds=embeds, num_denoising_steps=steps,
+    sess = StrideARSession(models, prompt, seed, blocks, anchors, prompt_embeds=embeds, num_denoising_steps=steps,
                          frame_callback=on_frames, start_image=start_image, input_video=input_video, strength=strength)
     t = time.perf_counter()
     sess.generate()
@@ -156,11 +156,11 @@ def run_helios(model, prompt, k, chunks, seed):
 def generate_helios(a):
     import imageio.v2 as imageio
     import torch
-    from .model_helios import HeliosSpecAR
+    from .model_helios import HeliosStrideAR
     from .schedule import max_draft_run, uniform_k
     anchors = uniform_k(a.k, a.blocks)
     print(f"target chunks (k={a.k}): {anchors}; longest drafter run {max_draft_run(anchors, a.blocks)}")
-    model = HeliosSpecAR(a.weights, [a.prompt])
+    model = HeliosStrideAR(a.weights, [a.prompt])
     latents, frames, secs = run_helios(model, a.prompt, a.k, a.blocks, a.seed)
     imageio.mimwrite(a.out, list(frames), fps=16, quality=7)
     print(f"{a.out}: {len(frames)} frames ({len(frames) / FPS:.1f} s of video), generated in {secs:.1f} s; peak GPU memory {torch.cuda.max_memory_allocated() / 2**30:.1f} GiB")
@@ -170,9 +170,9 @@ def generate_helios(a):
 
 def run_longlive(models, prompt, k, blocks, seed, kv_mode="shared", decode=True):
     """Generate one LongLive video; returns (latents, uint8 frames, generation seconds, per-block seconds)."""
-    from .model_longlive import LongLiveSpecAR
+    from .model_longlive import LongLiveStrideAR
     from .schedule import uniform_k
-    engine = models.engine if hasattr(models, "engine") else LongLiveSpecAR(models, kv_mode=kv_mode)
+    engine = models.engine if hasattr(models, "engine") else LongLiveStrideAR(models, kv_mode=kv_mode)
     models.engine = engine
     engine.kv_mode = kv_mode
     t = time.perf_counter()
@@ -248,14 +248,14 @@ def generate(a):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="specar")
+    ap = argparse.ArgumentParser(prog="stridear")
     sub = ap.add_subparsers(dest="cmd", required=True)
     d = sub.add_parser("download", help="fetch the backbone's weights from Hugging Face")
     d.add_argument("--backbone", choices=BACKBONES, default="krea")
     d.add_argument("--weights", default="weights")
-    g = sub.add_parser("generate", help="text to video with SpecAR")
+    g = sub.add_parser("generate", help="text to video with StrideAR")
     g.add_argument("--prompt", help="text prompt (or use --example)")
-    g.add_argument("--example", help="a prompt from the curated set, with its backbone, seed and k (see: specar examples)")
+    g.add_argument("--example", help="a prompt from the curated set, with its backbone, seed and k (see: stridear examples)")
     g.add_argument("--backbone", choices=BACKBONES, help="default krea")
     g.add_argument("--k", type=int, help="number of target blocks (target budget); default 7 (longlive: 2)")
     length = g.add_mutually_exclusive_group()
@@ -265,7 +265,7 @@ def main(argv=None):
                              f"frames = 32 video frames); default {H_DEFAULT} (longlive: {LONGLIVE_H_DEFAULT})")
     g.add_argument("--seed", type=int, help="default 42")
     g.add_argument("--weights", default="weights")
-    g.add_argument("--out", default="specar.mp4")
+    g.add_argument("--out", default="stridear.mp4")
     g.add_argument("--save-latents", action="store_true")
     g.add_argument("--image", help="Krea: image-to-video; the video continues from this image (resized to 832x480)")
     g.add_argument("--video", help="Krea: video-to-video; the output follows this video (resized to 832x480; its length "

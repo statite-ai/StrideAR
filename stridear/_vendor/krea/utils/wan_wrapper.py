@@ -27,7 +27,7 @@ class WanTextEncoder(torch.nn.Module):
             dtype=torch.float32,
             device=torch.device('cuda')
         ).eval().requires_grad_(False)
-        # SpecAR patch: Wan-AI/Wan2.1-T2V-1.3B on Hugging Face ships the T5 encoder as .pth; accept either format.
+        # StrideAR patch: Wan-AI/Wan2.1-T2V-1.3B on Hugging Face ships the T5 encoder as .pth; accept either format.
         t5 = os.path.join(MODEL_FOLDER, "Wan2.1-T2V-1.3B", "models_t5_umt5-xxl-enc-bf16")
         if os.path.exists(t5 + ".safetensors"):
             state_dict = safe_load_file(t5 + ".safetensors", device='cuda')

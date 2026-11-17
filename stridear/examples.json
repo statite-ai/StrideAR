@@ -6,7 +6,7 @@
     "k": 7,
     "blocks": 36,
     "source": "MovieGenVideoBench #1",
-    "note": "reference latents in specar-benchmark"
+    "note": "reference latents in stridear-benchmark"
   },
   "spaceman": {
     "backbone": "krea",
@@ -15,7 +15,7 @@
     "k": 7,
     "blocks": 36,
     "source": "MovieGenVideoBench #2",
-    "note": "reference latents in specar-benchmark"
+    "note": "reference latents in stridear-benchmark"
   },
   "monster": {
     "backbone": "krea",
@@ -24,7 +24,7 @@
     "k": 7,
     "blocks": 36,
     "source": "MovieGenVideoBench #4",
-    "note": "reference latents in specar-benchmark"
+    "note": "reference latents in stridear-benchmark"
   },
   "reef": {
     "backbone": "krea",
@@ -33,7 +33,7 @@
     "k": 7,
     "blocks": 36,
     "source": "MovieGenVideoBench #5",
-    "note": "reference latents in specar-benchmark"
+    "note": "reference latents in stridear-benchmark"
   },
   "cat": {
     "backbone": "krea",
@@ -78,7 +78,7 @@
     "k": 7,
     "blocks": 36,
     "source": "HeliosBench #59",
-    "note": "reference latents in specar-benchmark"
+    "note": "reference latents in stridear-benchmark"
   },
   "dandelion": {
     "backbone": "helios",
@@ -87,7 +87,7 @@
     "k": 7,
     "blocks": 36,
     "source": "HeliosBench #81",
-    "note": "reference latents in specar-benchmark"
+    "note": "reference latents in stridear-benchmark"
   },
   "ll-mammoths": {
     "backbone": "longlive",

@@ -8,7 +8,7 @@ is chosen once per process from the GPU's compute capability and the kernels tha
   fa4   FlashAttention 4   Blackwell (B200, B300)    also runs on Hopper
   fa2   FlashAttention 2   any GPU it was built for  fallback
 
-Override the choice with SPECAR_ATTENTION=fa2|fa3|fa4 or `specar generate --attention ...`. The backends do not share
+Override the choice with STRIDEAR_ATTENTION=fa2|fa3|fa4 or `stridear generate --attention ...`. The backends do not share
 one call signature; the differences are handled here and nowhere else.
 """
 import importlib
@@ -67,7 +67,7 @@ def choose(capability_major, available, override=None, gpu_name="this GPU"):
 def _only_plain(name, dropout_p, window_size, deterministic=False):
     if dropout_p or tuple(window_size) != (-1, -1) or deterministic:
         raise NotImplementedError(f"attention backend {name} does not support dropout, sliding windows or "
-                                  f"deterministic mode; use SPECAR_ATTENTION=fa2")
+                                  f"deterministic mode; use STRIDEAR_ATTENTION=fa2")
 
 
 def _tensor(out):
@@ -109,13 +109,13 @@ def _load(name):
 def gpu():
     import torch
     if not torch.cuda.is_available():
-        raise RuntimeError("SpecAR needs an NVIDIA GPU with CUDA; none is visible to PyTorch")
+        raise RuntimeError("StrideAR needs an NVIDIA GPU with CUDA; none is visible to PyTorch")
     return {"name": torch.cuda.get_device_name(0), "capability": tuple(torch.cuda.get_device_capability(0))}
 
 
 def select(override=None):
     """Choose and load the backend (once per process; an explicit override re-selects). Returns its name."""
-    override = override or os.environ.get("SPECAR_ATTENTION")
+    override = override or os.environ.get("STRIDEAR_ATTENTION") or os.environ.get("SPECAR_ATTENTION")  # old name still honoured
     if _state["name"] and (not override or override.lower() in ("auto", _state["name"])):
         return _state["name"]
     g = gpu()

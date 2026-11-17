@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: CC-BY-NC-SA-4.0
 # Adapted from Krea Realtime (https://github.com/krea-ai/realtime-video, CC BY-NC-SA 4.0): the generation loop,
-# KV-cache layout and loaders follow Krea's session code so that SpecAR outputs match it bit for bit.
-"""SpecAR decoder for Krea Realtime 14B (target) with the Self-Forcing 1.3B model as drafter.
+# KV-cache layout and loaders follow Krea's session code so that StrideAR outputs match it bit for bit.
+"""StrideAR decoder for Krea Realtime 14B (target) with the Self-Forcing 1.3B model as drafter.
 
 Per block b of H blocks (3 latent frames each, 5 denoising steps by default):
   1. rebuild the drafter's context KV cache from the committed latents (the target's only on target blocks)
@@ -26,7 +26,7 @@ os.environ.setdefault("DISABLE_SAGEATTENTION", "1")   # SageAttention changes nu
 
 
 def _install_attention(backend=None):
-    """Route every attention call in the vendored Krea/Wan code through specar.attention, which picks the kernel for
+    """Route every attention call in the vendored Krea/Wan code through stridear.attention, which picks the kernel for
     this GPU (FlashAttention 3 on Hopper, 4 on Blackwell; see attention.py). Call after MODEL_FOLDER is set."""
     import importlib
     from . import attention as A
@@ -57,7 +57,7 @@ DRAFTER_CKPT = "self_forcing_dmd.pt"
 def _install_config_only_loader():
     """The 14B weights come from Krea's state dict, so Wan2.1-T2V-14B/ holds only config.json: build from config."""
     from wan.modules.causal_model import CausalWanModel
-    if getattr(CausalWanModel, "_specar_config_only", False):
+    if getattr(CausalWanModel, "_stridear_config_only", False):
         return
     orig = CausalWanModel.from_pretrained.__func__
 
@@ -67,7 +67,7 @@ def _install_config_only_loader():
         return cls.from_config(cls.load_config(path), **kw)
 
     CausalWanModel.from_pretrained = classmethod(from_pretrained)
-    CausalWanModel._specar_config_only = True
+    CausalWanModel._stridear_config_only = True
 
 
 # ---------------------------------------------------------------- model loading (Krea's loaders)
@@ -131,7 +131,7 @@ def load_vae():
 
 
 class Models:
-    """Loads the target, drafter, text encoder and VAE from one weights directory (see `specar download`)."""
+    """Loads the target, drafter, text encoder and VAE from one weights directory (see `stridear download`)."""
 
     def __init__(self, weights, timestep_shift=5.0, attention=None):
         weights = os.path.abspath(weights)
@@ -171,7 +171,7 @@ def _zero_kv(cache):
 
 
 # ---------------------------------------------------------------- the session
-class SpecARSession:
+class StrideARSession:
     def __init__(self, models, prompt, seed, num_blocks, anchors, prompt_embeds=None, width=832, height=480,
                  kv_cache_num_frames=3, num_denoising_steps=5, timestep_shift=5.0, strength=1.0,
                  keep_first_frame=False, lazy_target_kv=True, skip_draft_on_anchors=True, frame_callback=None,
@@ -397,3 +397,6 @@ class SpecARSession:
         for _ in range(self.num_blocks):
             self.generate_block()
         return self.all_latents[:, :self.current_start_frame]
+
+
+SpecARSession = StrideARSession  # old name, kept so existing code keeps working

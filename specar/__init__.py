@@ -1,6 +1,25 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SpecAR: distributed target blocks for fast autoregressive video generation."""
-from .schedule import max_draft_run, uniform_k
+"""Old name of the `stridear` package. `import specar` and `import specar.<module>` return the stridear modules."""
+import importlib
+import importlib.abc
+import importlib.util
+import sys
 
-__version__ = "0.1.0"
-__all__ = ["uniform_k", "max_draft_run"]
+import stridear
+
+
+class _Alias(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def find_spec(self, name, path=None, target=None):
+        if name.startswith("specar."):
+            return importlib.util.spec_from_loader(name, self)
+        return None
+
+    def create_module(self, spec):
+        return importlib.import_module("stridear" + spec.name[len("specar"):])
+
+    def exec_module(self, module):
+        pass
+
+
+sys.meta_path.insert(0, _Alias())
+sys.modules[__name__] = stridear

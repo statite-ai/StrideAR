@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SpecAR target schedule: k anchors including block 0, spread as evenly as possible over H blocks.
+"""StrideAR target schedule: k anchors including block 0, spread as evenly as possible over H blocks.
 
 a_j = floor(j * H / k + 1/2), j = 0..k-1. The longest draft run is ceil((H - k) / k) (Appendix B of the paper).
 """

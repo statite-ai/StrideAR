@@ -3,7 +3,7 @@ import importlib.util
 import os
 import sys
 
-spec = importlib.util.spec_from_file_location("specar_attention", os.path.join(os.path.dirname(__file__), "..", "specar", "attention.py"))
+spec = importlib.util.spec_from_file_location("stridear_attention", os.path.join(os.path.dirname(__file__), "..", "stridear", "attention.py"))
 A = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(A)
 ALL = {"fa3": True, "fa4": True, "fa2": True}

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SpecAR decoder for LongLive-2.0 5B: the 4-step generator (target) generates the k scheduled blocks, the 2-step
+"""StrideAR decoder for LongLive-2.0 5B: the 4-step generator (target) generates the k scheduled blocks, the 2-step
 generator (the same network with NVIDIA's 2-step DMD LoRA merged, shipped as `model_te.pt`) drafts the rest.
 
 LongLive's own `CausalDiffusionInferencePipeline.inference` runs unchanged (block loop, UniPC scheduler, rolling KV
@@ -89,14 +89,14 @@ def _in_dir(path):
 
 class Models:
     """Loads LongLive's pipeline (target generator, T5, VAE) and the 2-step drafter from `weights`
-    (see `specar download --backbone longlive`)."""
+    (see `stridear download --backbone longlive`)."""
 
     def __init__(self, weights, attention=None):
         from omegaconf import OmegaConf
         self.weights = os.path.abspath(weights)
         for p in (TARGET_CKPT, DRAFTER_CKPT, os.path.join(WAN_DIR, "Wan2.2_VAE.pth")):
             if not os.path.exists(os.path.join(self.weights, p)):
-                raise FileNotFoundError(f"{p} not found in {self.weights}; run: specar download --backbone longlive")
+                raise FileNotFoundError(f"{p} not found in {self.weights}; run: stridear download --backbone longlive")
         self.attention = _install_attention(attention)
         from pipeline import CausalDiffusionInferencePipeline
         from utils.config import normalize_config
@@ -139,7 +139,7 @@ class _Dispatcher(torch.nn.Module):
         return self._e._forward(**kw)
 
 
-class LongLiveSpecAR:
+class LongLiveStrideAR:
     """The decoder. `generate(prompt, anchors, num_blocks, seed)` -> (latents [1, 8H, 48, h, w], uint8 frames
     [N, 720, 1280, 3], per-block seconds). `kv_mode` may be changed between videos."""
 
@@ -296,7 +296,7 @@ class LongLiveSpecAR:
     # ---- public ----------------------------------------------------------------------------------------------
     @contextlib.contextmanager
     def wrap(self, anchors, num_blocks):
-        """Make the next `pipe.inference(...)` call a SpecAR run (for hosts that drive LongLive's pipeline
+        """Make the next `pipe.inference(...)` call a StrideAR run (for hosts that drive LongLive's pipeline
         themselves, such as LongLive's inference.py): `with engine.wrap(uniform_k(2, 24), 24): pipe.inference(...)`.
         Afterwards `engine.block_seconds` holds the per-block times."""
         self._begin(anchors, num_blocks)
@@ -322,3 +322,6 @@ class LongLiveSpecAR:
             frames = video_to_uint8((video * 0.5 + 0.5).clamp(0, 1)).numpy()          # [T, 720, 1280, 3]
             del video
         return latents, frames, times
+
+
+LongLiveSpecAR = LongLiveStrideAR  # old name, kept so existing code keeps working

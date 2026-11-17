@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""specar-benchmark: generation time per video, and a bitwise check against the reference latents.
+"""stridear-benchmark: generation time per video, and a bitwise check against the reference latents.
 
 Krea Realtime: SHA-256 of the committed latents (bf16, [1, 108, 16, 60, 104]) for four prompts at seed 42, H=36.
 Helios: SHA-256 of the latents for two HeliosBench prompts at seed 115000 + prompt index, H=36.
@@ -56,7 +56,7 @@ def latent_sha256(latents):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="specar-benchmark")
+    ap = argparse.ArgumentParser(prog="stridear-benchmark")
     ap.add_argument("--backbone", choices=["krea", "helios", "longlive"], default="krea")
     ap.add_argument("--weights", default="weights")
     ap.add_argument("--k", type=int, nargs="+", default=None, help="default: 2 7 9 (Krea), 7 (Helios)")
@@ -113,7 +113,7 @@ def main(argv=None):
 
 
 # LongLive-2.0 5B: five Krea benchmark prompts (`cat` from the curated set) at seed 42; 12 blocks (15.9 s) and 24 blocks
-# (31.9 s); target-only, SpecAR k = 2, 5, 7 (shared KV cache), drafter-only. Reference latents: H100 + FlashAttention 3.
+# (31.9 s); target-only, StrideAR k = 2, 5, 7 (shared KV cache), drafter-only. Reference latents: H100 + FlashAttention 3.
 LONGLIVE_PROMPTS = dict(PROMPTS)
 LONGLIVE_PROMPTS[6] = ("A white and orange tabby cat is seen happily darting through a dense garden, as if chasing something. "
                        "Its eyes are wide and happy as it jogs forward, scanning the branches, flowers, and leaves as it walks. The "
@@ -169,9 +169,9 @@ def helios(a):
     import imageio.v2 as imageio
     import torch
     from .cli import run_helios
-    from .model_helios import HeliosSpecAR
+    from .model_helios import HeliosStrideAR
     ks = a.k or [7]
-    model = HeliosSpecAR(a.weights, list(HELIOS_PROMPTS.values()))
+    model = HeliosStrideAR(a.weights, list(HELIOS_PROMPTS.values()))
     rows, failed = [], 0
     for k in ks:
         for i, prompt in HELIOS_PROMPTS.items():

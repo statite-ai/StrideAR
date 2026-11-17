@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SpecAR decoder for Helios 14B: Helios-Base generates the target chunks, Helios-Distilled the others.
+"""StrideAR decoder for Helios 14B: Helios-Base generates the target chunks, Helios-Distilled the others.
 
 Helios-Base's own pipeline call runs unchanged (history windows, first-frame anchor, per-chunk noise draws, per-chunk
 VAE decode); only its per-chunk sampler is replaced:
@@ -46,8 +46,8 @@ def _to_uint8(v):
     return ((v[0].float().clamp(-1, 1) + 1) * 127.5).to(torch.uint8).permute(1, 2, 3, 0).cpu().numpy()
 
 
-class HeliosSpecAR:
-    """Loads Helios-Base and Helios-Distilled from `weights` (see `specar download --backbone helios`).
+class HeliosStrideAR:
+    """Loads Helios-Base and Helios-Distilled from `weights` (see `stridear download --backbone helios`).
 
     The text encoder is used once, for `prompts`, and then freed so both 14B transformers fit on one 80 GB GPU.
     """
@@ -133,3 +133,6 @@ class HeliosSpecAR:
         frames = np.concatenate([_to_uint8(c) for c in chunks])
         frames = frames[:(len(frames) - 1) // 4 * 4 + 1]  # same trim as HeliosPipeline.__call__
         return latents, frames, times
+
+
+HeliosSpecAR = HeliosStrideAR  # old name, kept so existing code keeps working

@@ -3,14 +3,14 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "specar"
+name = "stridear"
 version = "0.1.0"
-description = "SpecAR: distributed target blocks for fast autoregressive video generation"
+description = "StrideAR: distributed target blocks for fast autoregressive video generation"
 readme = "README.md"
 requires-python = ">=3.10"
-# Apache-2.0, except specar/model_krea.py and specar/_vendor/krea/ (CC-BY-NC-SA-4.0); see README "License"
+# Apache-2.0, except stridear/model_krea.py and stridear/_vendor/krea/ (CC-BY-NC-SA-4.0); see README "License"
 license = "Apache-2.0 AND CC-BY-NC-SA-4.0"
-license-files = ["LICENSE", "specar/_vendor/helios/LICENSE.txt", "specar/_vendor/krea/LICENSE.md", "specar/_vendor/krea/NOTICE.md", "specar/_vendor/longlive/LICENSE"]
+license-files = ["LICENSE", "stridear/_vendor/helios/LICENSE.txt", "stridear/_vendor/krea/LICENSE.md", "stridear/_vendor/krea/NOTICE.md", "stridear/_vendor/longlive/LICENSE"]
 authors = [{ name = "Hudeifa Hassan", email = "hudeifa@statite.ai" }]
 dependencies = [
     "torch",
@@ -98,11 +98,14 @@ helios = [
 ]
 
 [project.scripts]
-specar = "specar.cli:main"
-specar-benchmark = "specar.benchmark:main"
+stridear = "stridear.cli:main"
+stridear-benchmark = "stridear.benchmark:main"
+# old command names, kept as aliases
+specar = "stridear.cli:main"
+specar-benchmark = "stridear.benchmark:main"
 
 [tool.setuptools.packages.find]
-include = ["specar*"]
+include = ["stridear*", "specar*"]
 
 [tool.setuptools.package-data]
-specar = ["examples.json", "_vendor/**/*.py", "_vendor/**/*.md", "_vendor/**/*.txt", "_vendor/**/*.yaml", "_vendor/**/LICENSE", "_vendor/**/UPSTREAM_COMMIT"]
+stridear = ["examples.json", "_vendor/**/*.py", "_vendor/**/*.md", "_vendor/**/*.txt", "_vendor/**/*.yaml", "_vendor/**/LICENSE", "_vendor/**/UPSTREAM_COMMIT"]

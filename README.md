@@ -16,7 +16,9 @@ target-only generation (87.6 s); SDVG at the same target budget takes 56.8 s. La
 
 Paper: *StrideAR: Strided Target Blocks for Fast Autoregressive Video Generation*, Hudeifa Hassan, Statite.
 
-Project page: [statite.ai/stridear](https://statite.ai/stridear/) · Earlier preprint: [PDF](https://statite.ai/specar/specar.pdf) · ComfyUI: [ComfyUI-SpecAR](https://github.com/statite-ai/ComfyUI-SpecAR)
+Project page: [statite.ai/stridear](https://statite.ai/stridear/) · Paper: [PDF](https://statite.ai/stridear/stridear.pdf) · Earlier preprint: [PDF](https://statite.ai/stridear/specar.pdf) · ComfyUI: [ComfyUI-StrideAR](https://github.com/statite-ai/ComfyUI-StrideAR)
+
+This project was first released as SpecAR. The old `specar` command, `import specar` and `SPECAR_ATTENTION` still work.
 
 ## Quick start
 
@@ -31,33 +33,33 @@ downloads from shared IPs are often rate-limited.
 **Krea Realtime 14B** (about 50 GB download; a 26.6 s video generates in under a minute on an H100, after about 3 minutes of model loading)
 
 ```bash
-git clone https://github.com/statite-ai/SpecAR && cd SpecAR
+git clone https://github.com/statite-ai/StrideAR && cd StrideAR
 python3.11 -m venv .venv-krea && source .venv-krea/bin/activate
 pip install ".[krea]"
-specar download --backbone krea
-specar generate --backbone krea --prompt "A papercraft coral reef full of colorful fish" --k 2 --out reef.mp4
+stridear download --backbone krea
+stridear generate --backbone krea --prompt "A papercraft coral reef full of colorful fish" --k 2 --out reef.mp4
 ```
 
 **Helios 14B** (about 150 GB download for the two models on disk, about 66 GB of GPU memory while generating; a 74 s
 video generates in under 5 minutes on an H100 at k = 2, after about 1 minute of model loading)
 
 ```bash
-git clone https://github.com/statite-ai/SpecAR && cd SpecAR
+git clone https://github.com/statite-ai/StrideAR && cd StrideAR
 python3.11 -m venv .venv-helios && source .venv-helios/bin/activate
 pip install ".[helios]"
-specar download --backbone helios
-specar generate --backbone helios --prompt "A papercraft coral reef full of colorful fish" --k 2 --out reef.mp4
+stridear download --backbone helios
+stridear generate --backbone helios --prompt "A papercraft coral reef full of colorful fish" --k 2 --out reef.mp4
 ```
 
 **LongLive-2.0 5B** (about 52 GB download; a 32 s 1280x720 video generates in about 20 s of diffusion plus 37 s of VAE
 decoding on an H100 at k = 2, after about 2 minutes of model loading; 66 GB of GPU memory)
 
 ```bash
-git clone https://github.com/statite-ai/SpecAR && cd SpecAR
+git clone https://github.com/statite-ai/StrideAR && cd StrideAR
 python3.11 -m venv .venv-longlive && source .venv-longlive/bin/activate
 pip install ".[longlive]"
-specar download --backbone longlive
-specar generate --backbone longlive --prompt "A papercraft coral reef full of colorful fish" --k 2 --out reef.mp4
+stridear download --backbone longlive
+stridear generate --backbone longlive --prompt "A papercraft coral reef full of colorful fish" --k 2 --out reef.mp4
 ```
 
 Each backbone pins the library versions its reference outputs were produced with, so keep one environment per
@@ -66,9 +68,9 @@ backbone.
 ## Choosing what to generate
 
 ```bash
-specar generate --prompt "A spacecraft flying above Mars" --seconds 10 --k 2 --out mars.mp4
-specar generate --example cat --out cat.mp4      # a curated prompt with its paper settings
-specar examples                                  # list the curated prompts
+stridear generate --prompt "A spacecraft flying above Mars" --seconds 10 --k 2 --out mars.mp4
+stridear generate --example cat --out cat.mp4      # a curated prompt with its paper settings
+stridear examples                                  # list the curated prompts
 ```
 
 - **Prompt:** `--prompt "..."` for your own text, or `--example NAME` for one of the ten curated prompts below.
@@ -80,7 +82,7 @@ specar examples                                  # list the curated prompts
 - **Target budget:** `--k` is the number of blocks the target generates (2 is the fastest setting in the paper, 7 the
   default); the drafter generates the rest. `k` cannot exceed the number of blocks. The target generates blocks
   `floor(j * blocks / k + 1/2)` for `j = 0..k-1`.
-- **Output:** `--out` (default `specar.mp4`); `--seed` (default 42); `--weights` (default `weights`);
+- **Output:** `--out` (default `stridear.mp4`); `--seed` (default 42); `--weights` (default `weights`);
   `--save-latents` also writes the latents next to the video.
 - **Image-to-video (Krea):** `--image photo.jpg` continues the video from that image (any size; it is resized to
   832x480). The prompt, `--k` and the other options work as for text-to-video.
@@ -93,7 +95,7 @@ specar examples                                  # list the curated prompts
   own frame rate; its length caps the output length). `--strength` from 0 to 1 sets how far the result may move from
   the input (default 0.8).
 - **Execution (Krea):** `--attention auto|fa3|fa4|fa2` overrides the attention kernel (default `auto`; the
-  environment variable `SPECAR_ATTENTION` does the same); `--steps` sets the denoising steps per block (default 5,
+  environment variable `STRIDEAR_ATTENTION` does the same); `--steps` sets the denoising steps per block (default 5,
   the tested setting). The command prints the kernel it is using. The same prompt and seed give a different video on
   a different GPU family or attention kernel: the model is the same, but small numerical differences grow over the
   rollout.
@@ -117,46 +119,46 @@ the backbone, prompt, seed and k; any flag you give yourself takes precedence.
 | `dandelion` | helios | 115081 | A hyper-realistic macro photograph capturing the intricate d… |
 
 <p align="center"><img src="assets/demo.webp" width="832" alt="Four StrideAR videos on Krea Realtime 14B: a tabby cat in a garden, two dogs in a neon city, a tropical fish on a reef, a singer on a stage"></p>
-<p align="center"><sub>StrideAR on Krea Realtime 14B at k = 7: the first 8 s of four 26.6 s videos (<code>specar generate --example cat</code>,
+<p align="center"><sub>StrideAR on Krea Realtime 14B at k = 7: the first 8 s of four 26.6 s videos (<code>stridear generate --example cat</code>,
 <code>dogs</code>, <code>fish</code>, <code>singer</code>).</sub></p>
 
 `cat`, `dogs`, `fish` and `singer` are the videos on the project page. `mammoths`, `spaceman`, `monster`, `reef`,
-`helios-fish` and `dandelion` have reference latents in `specar-benchmark`, so they reproduce bit for bit. The
+`helios-fish` and `dandelion` have reference latents in `stridear-benchmark`, so they reproduce bit for bit. The
 `ll-` examples are the same prompts for LongLive-2.0 at k = 2, 24 blocks (31.9 s).
 
 From Python:
 
 ```python
-from specar.model_krea import Models, SpecARSession
-from specar.schedule import uniform_k
+from stridear.model_krea import Models, StrideARSession
+from stridear.schedule import uniform_k
 
 models = Models("weights")
-session = SpecARSession(models, "A papercraft coral reef", seed=42, num_blocks=36, anchors=uniform_k(7, 36))
+session = StrideARSession(models, "A papercraft coral reef", seed=42, num_blocks=36, anchors=uniform_k(7, 36))
 latents = session.generate()
 ```
 
 ```python
-from specar.model_longlive import Models, LongLiveSpecAR
-from specar.schedule import uniform_k
+from stridear.model_longlive import Models, LongLiveStrideAR
+from stridear.schedule import uniform_k
 
-engine = LongLiveSpecAR(Models("weights-longlive"), kv_mode="shared")
+engine = LongLiveStrideAR(Models("weights-longlive"), kv_mode="shared")
 latents, frames, block_seconds = engine.generate("A papercraft coral reef", uniform_k(2, 24), num_blocks=24, seed=42)
 ```
 
 ```python
-from specar.model_helios import HeliosSpecAR
-from specar.schedule import uniform_k
+from stridear.model_helios import HeliosStrideAR
+from stridear.schedule import uniform_k
 
-model = HeliosSpecAR("weights-helios", prompts=["A papercraft coral reef"])
+model = HeliosStrideAR("weights-helios", prompts=["A papercraft coral reef"])
 latents, frames, chunk_seconds = model.generate("A papercraft coral reef", uniform_k(7, 36), num_chunks=36, seed=42)
 ```
 
 ## Check your setup
 
 ```bash
-specar-benchmark --backbone krea --weights weights                     # k = 2, 7, 9; four prompts
-specar-benchmark --backbone helios --weights weights-helios            # k = 7; two prompts, about 11 min each
-specar-benchmark --backbone longlive --weights weights-longlive        # target-only, k = 2, 5, 7, drafter-only; 16 s and 32 s
+stridear-benchmark --backbone krea --weights weights                     # k = 2, 7, 9; four prompts
+stridear-benchmark --backbone helios --weights weights-helios            # k = 7; two prompts, about 11 min each
+stridear-benchmark --backbone longlive --weights weights-longlive        # target-only, k = 2, 5, 7, drafter-only; 16 s and 32 s
 ```
 
 The benchmark prints the generation time of each video and, on a Hopper GPU with FlashAttention 3 and 5 steps,
@@ -209,15 +211,15 @@ Per-run speeds and per-video scores are in `results/longlive2/`.
 
 ## License
 
-StrideAR's own code (`specar/schedule.py`, `specar/attention.py`, `specar/cli.py`, `specar/benchmark.py`,
-`specar/model_helios.py`, `specar/model_longlive.py`) is
-Apache-2.0 (`LICENSE`). `specar/_vendor/helios/` is copied unchanged from
-[Helios](https://github.com/PKU-YuanGroup/Helios) (Apache-2.0, `specar/_vendor/helios/LICENSE.txt`), and
-`specar/_vendor/longlive/` is the inference part of [LongLive](https://github.com/NVlabs/LongLive) `LongLive2.0/`,
-copied unchanged (Apache-2.0, `specar/_vendor/longlive/LICENSE`; the source commit is in `UPSTREAM_COMMIT`).
+StrideAR's own code (`stridear/schedule.py`, `stridear/attention.py`, `stridear/cli.py`, `stridear/benchmark.py`,
+`stridear/model_helios.py`, `stridear/model_longlive.py`) is
+Apache-2.0 (`LICENSE`). `stridear/_vendor/helios/` is copied unchanged from
+[Helios](https://github.com/PKU-YuanGroup/Helios) (Apache-2.0, `stridear/_vendor/helios/LICENSE.txt`), and
+`stridear/_vendor/longlive/` is the inference part of [LongLive](https://github.com/NVlabs/LongLive) `LongLive2.0/`,
+copied unchanged (Apache-2.0, `stridear/_vendor/longlive/LICENSE`; the source commit is in `UPSTREAM_COMMIT`).
 
-The Krea Realtime backend (`specar/model_krea.py`) is adapted from Krea's code, and `specar/_vendor/krea/` is copied
-from it; both are CC BY-NC-SA 4.0 (`specar/_vendor/krea/LICENSE.md`), which allows non-commercial use only. See
-`specar/_vendor/krea/NOTICE.md` for the source commit and the one change made.
+The Krea Realtime backend (`stridear/model_krea.py`) is adapted from Krea's code, and `stridear/_vendor/krea/` is copied
+from it; both are CC BY-NC-SA 4.0 (`stridear/_vendor/krea/LICENSE.md`), which allows non-commercial use only. See
+`stridear/_vendor/krea/NOTICE.md` for the source commit and the one change made.
 
 Model weights carry their own licenses on Hugging Face.
