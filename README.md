@@ -16,7 +16,7 @@ target-only generation (87.6 s); SDVG at the same target budget takes 56.8 s. La
 
 Paper: *SpecAR: Distributed Target Blocks for Fast Autoregressive Video Generation*, Hudeifa Hassan, Statite.
 
-Project page: [statite.ai/specar](https://statite.ai/specar) · Paper: [PDF](https://statite.ai/specar/specar.pdf) · ComfyUI: [ComfyUI-SpecAR](https://github.com/statite-ai/ComfyUI-SpecAR)
+Project page: [statite.ai/stridear](https://statite.ai/stridear/) · Paper: [PDF](https://statite.ai/specar/specar.pdf) · ComfyUI: [ComfyUI-SpecAR](https://github.com/statite-ai/ComfyUI-SpecAR)
 
 ## Quick start
 
@@ -203,7 +203,7 @@ Per-run speeds and per-video scores are in `results/longlive2/`.
   author = {Hassan, Hudeifa},
   year   = {2026},
   note   = {Preprint},
-  url    = {https://statite.ai/specar}
+  url    = {https://statite.ai/stridear/}
 }
 ```
 
