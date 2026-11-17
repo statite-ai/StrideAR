@@ -1,7 +1,7 @@
-# SpecAR
+# StrideAR
 
-SpecAR speeds up block-autoregressive video generation by letting a small drafter generate most blocks and the
-large target generate k blocks spread evenly over the video. This repository runs SpecAR on three backbones:
+StrideAR speeds up block-autoregressive video generation by letting a small drafter generate most blocks and the
+large target generate k blocks spread evenly over the video. This repository runs StrideAR on three backbones:
 
 | Backbone | Target | Drafter |
 |---|---|---|
@@ -9,20 +9,20 @@ large target generate k blocks spread evenly over the video. This repository run
 | `helios` | [Helios-Base 14B](https://huggingface.co/BestWishYsh/Helios-Base) | [Helios-Distilled 14B](https://huggingface.co/BestWishYsh/Helios-Distilled) |
 | `longlive` | [LongLive-2.0 5B](https://huggingface.co/Efficient-Large-Model/LongLive-2.0-5B), 4 steps | the same model with NVIDIA's [2-step DMD LoRA](https://huggingface.co/Efficient-Large-Model/LongLive-2.0-5B-NVFP4-S2) merged (`model_te.pt`, BF16) |
 
-<p align="center"><img src="assets/race.webp" width="1248" alt="Speed race on Krea Realtime 14B: target-only generation finishes in 87.6 s, SDVG in 56.8 s, SpecAR at k = 2 in 32.8 s (2.67x faster)"></p>
+<p align="center"><img src="assets/race.webp" width="1248" alt="Speed race on Krea Realtime 14B: target-only generation finishes in 87.6 s, SDVG in 56.8 s, StrideAR at k = 2 in 32.8 s (2.67x faster)"></p>
 <p align="center"><sub>Krea Realtime 14B on one H100, same prompt and seed. Each video plays as fast as its method generates it,
-block by block; generation time is shown at 3&times; speed. SpecAR (k = 2) finishes in 32.8 s, 2.67&times; faster than
+block by block; generation time is shown at 3&times; speed. StrideAR (k = 2) finishes in 32.8 s, 2.67&times; faster than
 target-only generation (87.6 s); SDVG at the same target budget takes 56.8 s. Latencies from Table 1 of the paper.</sub></p>
 
-Paper: *SpecAR: Distributed Target Blocks for Fast Autoregressive Video Generation*, Hudeifa Hassan, Statite.
+Paper: *StrideAR: Strided Target Blocks for Fast Autoregressive Video Generation*, Hudeifa Hassan, Statite.
 
-Project page: [statite.ai/stridear](https://statite.ai/stridear/) · Paper: [PDF](https://statite.ai/specar/specar.pdf) · ComfyUI: [ComfyUI-SpecAR](https://github.com/statite-ai/ComfyUI-SpecAR)
+Project page: [statite.ai/stridear](https://statite.ai/stridear/) · Earlier preprint: [PDF](https://statite.ai/specar/specar.pdf) · ComfyUI: [ComfyUI-SpecAR](https://github.com/statite-ai/ComfyUI-SpecAR)
 
 ## Quick start
 
 Needs one NVIDIA data-centre GPU, a CUDA 12.8 driver and Python 3.11: Hopper (H100 80GB, H200 141GB) for all
 backbones, or Blackwell (B200) for Krea Realtime. The install and the commands are the same on either. Nothing has
-to be compiled: SpecAR picks the attention kernel for the GPU when it starts, FlashAttention 3 on Hopper (fetched
+to be compiled: StrideAR picks the attention kernel for the GPU when it starts, FlashAttention 3 on Hopper (fetched
 prebuilt from the Hugging Face kernel hub on first use) and FlashAttention 4 on Blackwell (installed with the
 package). All weights are public.
 On a shared cloud machine, log in to Hugging Face first (`hf auth login`, a free account is enough): anonymous
@@ -116,8 +116,8 @@ the backbone, prompt, seed and k; any flag you give yourself takes precedence.
 | `helios-fish` | helios | 115059 | A vibrant tropical fish swimming gracefully among colorful c… |
 | `dandelion` | helios | 115081 | A hyper-realistic macro photograph capturing the intricate d… |
 
-<p align="center"><img src="assets/demo.webp" width="832" alt="Four SpecAR videos on Krea Realtime 14B: a tabby cat in a garden, two dogs in a neon city, a tropical fish on a reef, a singer on a stage"></p>
-<p align="center"><sub>SpecAR on Krea Realtime 14B at k = 7: the first 8 s of four 26.6 s videos (<code>specar generate --example cat</code>,
+<p align="center"><img src="assets/demo.webp" width="832" alt="Four StrideAR videos on Krea Realtime 14B: a tabby cat in a garden, two dogs in a neon city, a tropical fish on a reef, a singer on a stage"></p>
+<p align="center"><sub>StrideAR on Krea Realtime 14B at k = 7: the first 8 s of four 26.6 s videos (<code>specar generate --example cat</code>,
 <code>dogs</code>, <code>fish</code>, <code>singer</code>).</sub></p>
 
 `cat`, `dogs`, `fish` and `singer` are the videos on the project page. `mammoths`, `spaceman`, `monster`, `reef`,
@@ -174,13 +174,13 @@ prompts; the spread across prompts is under 0.5% in every cell.
 | | 16 s video (12 blocks) | 32 s video (24 blocks) |
 |---|---:|---:|
 | LongLive-2.0, 4 steps (target only) | 25.2 fps | 24.6 fps |
-| SpecAR k = 2 | 38.0 fps (1.51x) | 39.0 fps (1.59x) |
-| SpecAR k = 5 | 33.0 fps (1.31x) | 36.1 fps (1.47x) |
-| SpecAR k = 7 | 30.2 fps (1.20x) | 34.4 fps (1.40x) |
+| StrideAR k = 2 | 38.0 fps (1.51x) | 39.0 fps (1.59x) |
+| StrideAR k = 5 | 33.0 fps (1.31x) | 36.1 fps (1.47x) |
+| StrideAR k = 7 | 30.2 fps (1.20x) | 34.4 fps (1.40x) |
 | 2-step model alone (drafter only) | 41.7 fps (1.66x) | 40.9 fps (1.66x) |
 
 The 2-step model costs 3 forwards per block (2 steps and LongLive's clean pass that writes the block into the KV
-cache) against 5 for the 4-step model, so 1.66x is the ceiling for any schedule on this pair; SpecAR at k = 2 reaches
+cache) against 5 for the 4-step model, so 1.66x is the ceiling for any schedule on this pair; StrideAR at k = 2 reaches
 96% of it on 32 s videos.
 
 Quality, Restricted VBench Quality-6 (the paper's metric, 0-100), same prompts and seed, both lengths:
@@ -188,9 +188,9 @@ Quality, Restricted VBench Quality-6 (the paper's metric, 0-100), same prompts a
 | | 16 s video | 32 s video |
 |---|---:|---:|
 | target only | 81.85 | 81.00 |
-| SpecAR k = 2 | 81.16 (99.2%) | 79.55 (98.2%) |
-| SpecAR k = 5 | 81.38 (99.4%) | 80.36 (99.2%) |
-| SpecAR k = 7 | 81.32 (99.4%) | 81.58 (100.7%) |
+| StrideAR k = 2 | 81.16 (99.2%) | 79.55 (98.2%) |
+| StrideAR k = 5 | 81.38 (99.4%) | 80.36 (99.2%) |
+| StrideAR k = 7 | 81.32 (99.4%) | 81.58 (100.7%) |
 | drafter only | 79.83 (97.5%) | 79.79 (98.5%) |
 
 Per-run speeds and per-video scores are in `results/longlive2/`.
@@ -198,8 +198,8 @@ Per-run speeds and per-video scores are in `results/longlive2/`.
 ## Citation
 
 ```bibtex
-@misc{hassan2026specar,
-  title  = {SpecAR: Distributed Target Blocks for Fast Autoregressive Video Generation},
+@misc{hassan2026stridear,
+  title  = {StrideAR: Strided Target Blocks for Fast Autoregressive Video Generation},
   author = {Hassan, Hudeifa},
   year   = {2026},
   note   = {Preprint},
@@ -209,7 +209,7 @@ Per-run speeds and per-video scores are in `results/longlive2/`.
 
 ## License
 
-SpecAR's own code (`specar/schedule.py`, `specar/attention.py`, `specar/cli.py`, `specar/benchmark.py`,
+StrideAR's own code (`specar/schedule.py`, `specar/attention.py`, `specar/cli.py`, `specar/benchmark.py`,
 `specar/model_helios.py`, `specar/model_longlive.py`) is
 Apache-2.0 (`LICENSE`). `specar/_vendor/helios/` is copied unchanged from
 [Helios](https://github.com/PKU-YuanGroup/Helios) (Apache-2.0, `specar/_vendor/helios/LICENSE.txt`), and
